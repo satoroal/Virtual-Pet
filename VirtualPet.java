@@ -13,15 +13,21 @@ public class VirtualPet
     private String name; // Pet's name
     
     // Pet statistics
-    private int hunger; // Hunger level of the pet
-    private int energy; // Energy level of the pet
-    private int happiness; // Happiness level of the pet
+    private double hunger; // Hunger level of the pet
+    private double energy; // Energy level of the pet
+    private double happiness; // Happiness level of the pet
     
     // Pet visuals
     private double petX; // X coord of pet
     private double petY; // Y coord of pet
-    private double width; // Width of the pet
-    private double height; // Height of the pet
+    private double petWidth; // Width of the pet
+    private double petHeight; // Height of the pet
+    
+    // Bounding box
+    private double petLeft; // Left of the bounding box
+    private double petTop; // Top of the bounding box
+    private double petBottom; // Bottom of the bounding box
+    
     
     // Fields for user to give the pet characteristics
     private Scanner userInput = new Scanner(System.in); // Creating scanner object
@@ -30,20 +36,70 @@ public class VirtualPet
      * Constructor for objects of class virtualpet
      */
     public VirtualPet(String name) {
-        this.name = name;
+        // The name of the pet
+        name = name;
+        
+        // Regarding the pet's location
+        petX = 150.0;
+        petY = 150.0;
+        petWidth = 100.0;
+        petHeight = 100.0;
+        
+        // The pets statistics
+        hunger = 100.0;
+        energy = 50.0;
+        happiness = 80.0;
+        
+        // Calling methods to set the pets bounding box
+        setLeft();
+        setTop();
+        setBottom();
+    }
+    
+    /**
+     * Set the left of the bounding box
+     */
+    public void setLeft() {
+        this.petLeft = this.petX - this.petWidth/2.0;
+    }
+    
+    /**
+     * Set the top of the bounding box
+     */
+    public void setTop() {
+       this.petTop = this.petY - this.petWidth/2.0;
+    }
+    
+    public void setBottom() {
+        this.petBottom = this.petY + this.petHeight;
     }
     
     /**
      * Method to draw the pet
      */
     public void draw() {
-        // Draw the pet
         UI.setColor(Color.blue);
-        UI.fillRect(60, 30, 100, 100);
+        UI.fillRect(petLeft, petTop, petWidth, petHeight);
     }
     
-    public void askPetName() {
-        name = UI.askString("What is the name of your pet?"); // Ask the user for the pets name
-        UI.println(name); // Test to see if name was registered
+    /**
+     * Return the hunger of the pet
+     */
+    public double getHunger() {
+        return this.hunger;
+    }
+    
+    /**
+     * Return the energy level of the pet
+     */
+    public double getEnergy() {
+        return this.energy;
+    }
+    
+    /**
+     * Return the happiness level of the pet
+     */
+    public double getHappiness() {
+        return this.happiness;
     }
 }
