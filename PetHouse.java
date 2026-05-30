@@ -15,12 +15,6 @@ public class PetHouse
     // Hashmap
     private HashMap<String, Double> foodStorage = new HashMap<String, Double>();
     
-    // Final double to store the energy amounts of food items
-    private final double TOMATOENERGY;
-    private final double PASSIONFRUITENERGY;
-    private final double KIBBLEENERGY;
-    private final double STEAKENERGY;
-    
     /**
      * Constructor for objects of class Pethouse
      */
@@ -34,21 +28,20 @@ public class PetHouse
         // Button to play with the pet
         
         // Initializing the hashmap to store items in the food storage
-        HashMap<String, Double> foodStorage = new HashMap<String, Double>();
-        
-        // Food Storage amounts
-        TOMATOENERGY = 5.0;
-        PASSIONFRUITENERGY = 10.0;
-        KIBBLEENERGY = 15.0;
-        STEAKENERGY = 20.0;   
+        foodStorage = new HashMap<>();
+        addFoodItems(foodStorage);
+  
     }
     
+    /**
+     * Method to add items into the food storage
+     */
     public void addFoodItems(HashMap<String, Double> items) {
         // Add items to the HashMap (Food name, Energy restoration value)
-        items.put("tomato", TOMATOENERGY);
-        items.put("passionfruit", PASSIONFRUITENERGY);
-        items.put("kibble", KIBBLEENERGY);
-        items.put("steak", STEAKENERGY);     
+        items.put("tomato", 5.0);
+        items.put("passionfruit", 10.0);
+        items.put("kibble", 15.0);
+        items.put("steak", 20.0);     
     }
     
     /**
@@ -64,7 +57,8 @@ public class PetHouse
     
         while (!petValid) {
             // Ask the user for the pets name
-            String name = UI.askString("What would you like your pet to be named? Please keep it between 1-15 letters").toLowerCase();
+            String name = UI.askString("What would you like your pet to be named? \n" +
+                                        "Please keep it between 1-15 letters").toLowerCase();
             
             if (name.length() < MIN_LENGTH || name.length() > MAX_LENGTH) {
                 UI.println("This is not a valid name. Please try again"); // Repeat if name is invalid
@@ -85,39 +79,84 @@ public class PetHouse
     /**
      * Method to feed the pet
      * Prompt user to choose whether they want to check storage or feed the pet
-     * If they want to check the food storage call the helper method
-     * If they want to feed the pet ask what they would like to feed their pet
-     * Increase the hunger level accordingly with the food item
-     * If the pet is already full (hunger = 100) tell the user they cannot feed the pet anymore
+     * If they want to check the food storage call the appropriate method
+     * If they want to feed the pet call the appropriate method
+     * End loop when they choose to stop
      */
     public void feedPet() {
-        PetHouse obj = new PetHouse();
         final double MAXHUNGER = 100.0; // Set a max hunger level
         boolean feeding = true; // Create a boolean for the while loop
         
-        while (feeding = true) {
-            int feedingInput = UI.askInt("What would you like to do? Please answer with a numerical value \n" +
+        while (feeding) {
+            int feedingInput = UI.askInt("What would you like to do? Please answer with a number \n" +
                                             "1. Check your food storage \n" +
-                                            "2. Feed your pet");
+                                            "2. Feed your pet \n" +
+                                            "3. Stop");
             if (feedingInput == 1) {
-                for (String i : foodStorage.keySet()) {
-                    UI.println("Food: " +  i);
+                printFoodStorage(foodStorage); // Print the foodnames
+                
+                // Ask the user which food item they would like to check the energy of
+                String searchInput = UI.askString("Which item would you like to check the value of?").toLowerCase();
+                checkFoodEnergy(foodStorage, searchInput); // Call the checking storage helper method
+            } else if (feedingInput == 2) {
+                printFoodStorage(foodStorage); // Print the food names
+                
+                // Ask the user the name of the food they would like to feed their pet
+                String chosenFood = UI.askString("What would you like to feed your pet?").toLowerCase();
+                if (newPet.getHunger() == MAXHUNGER) {
+                    UI.println("Your pet is full! You cannot feed them");
+                    feeding = false; // Stops the loop
+                } else {
+                    feedPetFood(foodStorage, chosenFood); // Call the feeding helper method
                 }
-                String searchInput = UI.askString("Which item would you like to check?").toLowerCase();
-                obj.checkFoodEnergy(foodStorage, searchInput);
-            }                        
-        }       
+            } else if (feedingInput == 3) {
+                feeding = false; // Stops the loop 
+                UI.println("Print to show loop has ended for testing purposes");
+            } else {
+                UI.println("That is not a valid option! Please try again");
+            }
+        }
     }
     
     /**
-     * Helper method to check the energy level of a food
+     * Helper method to print food storage
+     */
+    public void printFoodStorage(HashMap<String, Double> items) {
+        UI.println("Current Food Storage");
+        for (String foodName : foodStorage.keySet()) {
+            UI.println("Food: " + foodName); // Print out the hashmap
+        }
+    }
+    
+    /**
+     * Method to check the energy level of a food
+     * Check if the user input is an existing key in the hashmap
+     * If it is, find the associated energy value and print it
+     * If not, tell them that the food does not exist in the storage
      */
     public void checkFoodEnergy(HashMap<String, Double> items, String searchInput) {
-        if (items.containsKey(searchInput)) {
-            double energy = items.get(searchInput);
-            UI.println("The energy value for this food is " + energy + "units.");
+        if (items.containsKey(searchInput)) { //Check if the input is in the hashmap
+            double energy = items.get(searchInput); // Assign a variable to the necessary value
+            UI.println("The energy value for this food is " + energy + "units."); // Print out the value
         } else {
-            UI.println(searchInput + " does not exist. Sorry!");
+            UI.println(searchInput + " is not in the storage. Sorry!");
         }
+    }
+    
+    /**
+     * Method to increase the pets hunger
+     * If the inputted food exists, increase hunger according to the energy value
+     * Print the new hunger of the pet
+     * If it does not exist, inform the user
+     */
+    public void feedPetFood(HashMap<String, Double> items, String chosenFood) {
+    if (items.containsKey(chosenFood)) {
+        double currentHunger = newPet.getHunger(); // Create a new variable for the pets current hunger
+        currentHunger += foodStorage.get(chosenFood); // Add the foods energy value to the current hunger
+        newPet.setHunger(currentHunger); // Set the new hunger of the pet
+        UI.println("Your pets hunger is now " + newPet.getHunger()); // Print the pets new hunger
+    } else {
+        UI.println(chosenFood + " is not in the storage. Sorry!");
+    }
     }
 }

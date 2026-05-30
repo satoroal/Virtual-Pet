@@ -1,6 +1,6 @@
 import ecs100.*;
 import java.awt.Color;
-import java.util.Scanner;
+import java.util.HashMap; // Import the hashmap class
 /**
  * Support class to create a virtual pet
  *
@@ -9,8 +9,7 @@ import java.util.Scanner;
  */
 public class VirtualPet
 {
-    // Fields needed for the virtual pet
-    private String name; // Pet's name
+    // Fields needed for the virtual pet 
     
     // Pet statistics
     private double hunger; // Hunger level of the pet
@@ -28,17 +27,13 @@ public class VirtualPet
     private double petTop; // Top of the bounding box
     private double petBottom; // Bottom of the bounding box
     
-    
-    // Fields for user to give the pet characteristics
-    private Scanner userInput = new Scanner(System.in); // Creating scanner object
-    
+    private HashMap<String, Double> foodStorage = new HashMap<String, Double>();
+
+        
     /**
      * Constructor for objects of class virtualpet
      */
-    public VirtualPet(String name) {
-        // The name of the pet
-        name = name;
-        
+    public VirtualPet(String name) {        
         // Regarding the pet's location
         petX = 150.0;
         petY = 150.0;
@@ -46,7 +41,7 @@ public class VirtualPet
         petHeight = 100.0;
         
         // The pets statistics
-        hunger = 100.0;
+        hunger = 50.0;
         energy = 50.0;
         happiness = 80.0;
         
@@ -80,6 +75,13 @@ public class VirtualPet
     public void draw() {
         UI.setColor(Color.blue);
         UI.fillRect(petLeft, petTop, petWidth, petHeight);
+    }
+    
+    /**
+    * Set the hunger of the pet
+    */
+    public void setHunger(double hunger) {
+        this.hunger = hunger;
     }
     
     /**
