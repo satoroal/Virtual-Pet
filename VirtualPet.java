@@ -8,13 +8,11 @@ import java.util.HashMap; // Import the hashmap class
  * 25/05/2026
  */
 public class VirtualPet
-{
-    // Fields needed for the virtual pet 
-    
+{    
     // Pet statistics
     private double hunger; // Hunger level of the pet
     private double energy; // Energy level of the pet
-    private double happiness; // Happiness level of the pet
+    private double moodLevel; // moodLevel level of the pet
     
     // Pet visuals
     private double petX; // X coord of pet
@@ -26,10 +24,7 @@ public class VirtualPet
     private double petLeft; // Left of the bounding box
     private double petTop; // Top of the bounding box
     private double petBottom; // Bottom of the bounding box
-    
-    private HashMap<String, Double> foodStorage = new HashMap<String, Double>();
-
-        
+    private boolean petClicked; // 
     /**
      * Constructor for objects of class virtualpet
      */
@@ -43,7 +38,7 @@ public class VirtualPet
         // The pets statistics
         hunger = 50.0;
         energy = 50.0;
-        happiness = 80.0;
+        moodLevel = 80.0;
         
         // Calling methods to set the pets bounding box
         setLeft();
@@ -99,9 +94,50 @@ public class VirtualPet
     }
     
     /**
-     * Return the happiness level of the pet
+     * Method to decrease the pets energy
      */
-    public double getHappiness() {
-        return this.happiness;
+    public void decreaseEnergy() {
+        energy -= 5;
+    }
+    
+    /**
+     * Method to increase the pets energy
+     */
+    public void increaseEnergy() {
+        energy += 5;
+    }
+    
+    /**
+     * Return the mood level of the pet
+     */
+    public double getMoodLevel() {
+        return this.moodLevel;
+    }
+    
+    /**
+     * Method to decrease the pets mood level
+     */
+    public void decreaseMood() {
+        moodLevel -= 2;
+    }
+    
+    /**
+     * Method to increase the pets mood level
+     */
+    public void increaseMood() {
+        moodLevel += 5;
+    }
+    
+    /** 
+     * Method to report whether x and y are on the pet
+     */
+    public boolean onPet(double x, double y) {
+        if ((x >= this.petLeft) && (x <= this.petLeft + petWidth)
+        && (y >= this.petTop) && (y <= this.petBottom)) {
+            this.petClicked = true;    
+        } else {
+            this.petClicked = false;
+        }
+        return petClicked;
     }
 }

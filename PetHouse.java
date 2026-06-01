@@ -1,7 +1,6 @@
 import ecs100.*; // Import the ecs100 library
 import java.awt.Color; // Import the color class
 import java.util.HashMap; // Import the hashmap class
-import java.util.Map;
 /**
  * Driver class for user to create pets
  *
@@ -22,10 +21,11 @@ public class PetHouse
     {
         UI.initialise(); // Initialise the program
         UI.addButton("Quit", UI::quit); // Creates button which enables user to quit the program
-        UI.addButton("Create Pet", this::createPet);  // Button for the user to create their pet
-        UI.addButton("Feed Pet", this::feedPet); // Button for feeding the pet
+        UI.addButton("Create", this::createPet);  // Button for the user to create their pet
+        UI.addButton("Feed", this::feedPet); // Button for feeding the pet
         // Button to put the pet to sleep
-        // Button to play with the pet
+        //UI.setMouseListener(this :: doMouse);
+        UI.addButton("Play", this::petPlaying);// Button to play with the pet
         
         // Initializing the hashmap to store items in the food storage
         foodStorage = new HashMap<>();
@@ -71,7 +71,7 @@ public class PetHouse
                 // Print out the pets vitals to the user
                 UI.println("Your pets hunger is at " + newPet.getHunger() + "/100");
                 UI.println("Your pets energy is at " + newPet.getEnergy() + "/100");
-                UI.println("Your pets happiness is at " + newPet.getHappiness() + "/100");
+                UI.println("Your pets happiness is at " + newPet.getMoodLevel() + "/100");
             }
         }
     }
@@ -158,5 +158,61 @@ public class PetHouse
     } else {
         UI.println(chosenFood + " is not in the storage. Sorry!");
     }
+    }
+    
+    /**
+     * Method to report if the pet has been clicked onto
+     *
+    public void doMouse(String action, double x, double y) {
+        if(action.equals("clicked")) {
+            if(newPet.onPet(x,y)) {
+                petPlaying();
+            }
+        }
+    }
+    */
+       
+    /**
+     * Method for the user to play with the pet
+     * Ask if they would like to play with the pet
+     * If they say yes, decrease energy and inform them of the new energy
+     * If they say no, end the loop
+     * If energy is too low inform the user and end the loop
+     * If the input is not valid inform the user and ask again
+     */
+    public void petPlaying() {
+        boolean keepClicking = true; // Condition for the while loop
+        final double MIN_ENERGY = 15.0;
+        
+        while (keepClicking) {
+            String clickInput = UI.askString("Would you like to play? Yes or No").toLowerCase();
+            if (clickInput.equals("yes") ) {
+                if(newPet.getEnergy() <= MIN_ENERGY) {
+                    UI.println("Energy is too low! Your pet cannot play anymore");
+                    keepClicking = false;
+                } else {
+                    newPet.decreaseEnergy();
+                    newPet.increaseMood();
+                    UI.println("Energy is now at " + newPet.getEnergy());
+                    UI.println("Happiness is now at " + newPet.getMoodLevel());
+                } 
+            } else if (clickInput.equals("no")) {
+                keepClicking = false;         
+            } 
+            else if (newPet.getEnergy() <= MIN_ENERGY) {
+                UI.println("Energy is too low! Your pet cannot play anymore");
+                keepClicking = false;
+            }else {
+                UI.println("Not valid input! Please try again");
+            }
+        }
+    }   
+    
+    /**
+     * Method for the pet sleep
+     */
+    public void petSleeping() {
+        boolean keepSleeping = true; // Condition for the while loop
+        final double MAX_ENERGY = 100.0;
     }
 }
