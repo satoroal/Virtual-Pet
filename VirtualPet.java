@@ -93,18 +93,18 @@ public class VirtualPet
         return this.energy;
     }
     
+    /** 
+     * Set the energy level of the pet
+     */
+    public void setEnergy(double energy) {
+        this.energy = energy;
+    }
+    
     /**
      * Method to decrease the pets energy
      */
     public void decreaseEnergy() {
         energy -= 5;
-    }
-    
-    /**
-     * Method to increase the pets energy
-     */
-    public void increaseEnergy() {
-        energy += 5;
     }
     
     /**

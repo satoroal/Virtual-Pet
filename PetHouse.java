@@ -23,7 +23,7 @@ public class PetHouse
         UI.addButton("Quit", UI::quit); // Creates button which enables user to quit the program
         UI.addButton("Create", this::createPet);  // Button for the user to create their pet
         UI.addButton("Feed", this::feedPet); // Button for feeding the pet
-        // Button to put the pet to sleep
+        UI.addButton("Sleep", this::petSleeping);// Button to put the pet to sleep
         //UI.setMouseListener(this :: doMouse);
         UI.addButton("Play", this::petPlaying);// Button to play with the pet
         
@@ -87,34 +87,38 @@ public class PetHouse
         final double MAXHUNGER = 100.0; // Set a max hunger level
         boolean feeding = true; // Create a boolean for the while loop
         
-        while (feeding) {
-            int feedingInput = UI.askInt("What would you like to do? Please answer with a number \n" +
+         if (newPet != null) {
+            while (feeding) {
+        
+                int feedingInput = UI.askInt("What would you like to do? Please answer with a number \n" +
                                             "1. Check your food storage \n" +
                                             "2. Feed your pet \n" +
                                             "3. Stop");
-            if (feedingInput == 1) {
-                printFoodStorage(foodStorage); // Print the foodnames
-                
-                // Ask the user which food item they would like to check the energy of
-                String searchInput = UI.askString("Which item would you like to check the value of?").toLowerCase();
-                checkFoodEnergy(foodStorage, searchInput); // Call the checking storage helper method
-            } else if (feedingInput == 2) {
-                printFoodStorage(foodStorage); // Print the food names
-                
-                // Ask the user the name of the food they would like to feed their pet
-                String chosenFood = UI.askString("What would you like to feed your pet?").toLowerCase();
-                if (newPet.getHunger() == MAXHUNGER) {
-                    UI.println("Your pet is full! You cannot feed them");
-                    feeding = false; // Stops the loop
+                if (feedingInput == 1) {
+                    printFoodStorage(foodStorage); // Print the foodnames
+                    
+                    // Ask the user which food item they would like to check the energy of
+                    String searchInput = UI.askString("Which item would you like to check the value of?").toLowerCase();
+                    checkFoodEnergy(foodStorage, searchInput); // Call the checking storage helper method
+                } else if (feedingInput == 2) {
+                    if (newPet.getHunger() >= MAXHUNGER) {
+                        UI.println("Your pet is full! You cannot feed them");
+                        feeding = false; // Stops the loop
+    
+                    } else {
+                        printFoodStorage(foodStorage); // Print the food names
+                        String chosenFood = UI.askString("What would you like to feed your pet?").toLowerCase();
+                        feedPetFood(foodStorage, chosenFood); // Call the feeding helper method
+                    }
+                } else if (feedingInput == 3) {
+                    feeding = false; // Stops the loop 
+                    UI.println("Print to show loop has ended for testing purposes");
                 } else {
-                    feedPetFood(foodStorage, chosenFood); // Call the feeding helper method
+                    UI.println("That is not a valid option! Please try again");
                 }
-            } else if (feedingInput == 3) {
-                feeding = false; // Stops the loop 
-                UI.println("Print to show loop has ended for testing purposes");
-            } else {
-                UI.println("That is not a valid option! Please try again");
             }
+        } else {
+            UI.println("You must create a pet first!");
         }
     }
     
@@ -137,7 +141,7 @@ public class PetHouse
     public void checkFoodEnergy(HashMap<String, Double> items, String searchInput) {
         if (items.containsKey(searchInput)) { //Check if the input is in the hashmap
             double energy = items.get(searchInput); // Assign a variable to the necessary value
-            UI.println("The energy value for this food is " + energy + "units."); // Print out the value
+            UI.println("The energy value for this food is " + energy + " units."); // Print out the value
         } else {
             UI.println(searchInput + " is not in the storage. Sorry!");
         }
@@ -184,35 +188,58 @@ public class PetHouse
         boolean keepClicking = true; // Condition for the while loop
         final double MIN_ENERGY = 15.0;
         
-        while (keepClicking) {
-            String clickInput = UI.askString("Would you like to play? Yes or No").toLowerCase();
-            if (clickInput.equals("yes") ) {
-                if(newPet.getEnergy() <= MIN_ENERGY) {
-                    UI.println("Energy is too low! Your pet cannot play anymore");
-                    keepClicking = false;
-                } else {
-                    newPet.decreaseEnergy();
-                    newPet.increaseMood();
-                    UI.println("Energy is now at " + newPet.getEnergy());
-                    UI.println("Happiness is now at " + newPet.getMoodLevel());
+        if (newPet != null) {
+            while (keepClicking) {
+                String clickInput = UI.askString("Would you like to play? Yes or No").toLowerCase();
+                if (clickInput.equals("yes") ) {
+                    if(newPet.getEnergy() <= MIN_ENERGY) {
+                        UI.println("Energy is too low! Your pet cannot play anymore");
+                        keepClicking = false;
+                    } else {
+                        newPet.decreaseEnergy();
+                        newPet.increaseMood();
+                        UI.println("Energy is now at " + newPet.getEnergy());
+                        UI.println("Happiness is now at " + newPet.getMoodLevel());
+                    } 
+                } else if (clickInput.equals("no")) {
+                    UI.println("You are now done playing with your pet!");
+                    keepClicking = false;         
                 } 
-            } else if (clickInput.equals("no")) {
-                keepClicking = false;         
-            } 
-            else if (newPet.getEnergy() <= MIN_ENERGY) {
-                UI.println("Energy is too low! Your pet cannot play anymore");
-                keepClicking = false;
-            }else {
-                UI.println("Not valid input! Please try again");
+                else {
+                    UI.println("Not valid input! Please try again");
+                }
             }
+        } else {
+            UI.println("You must create a pet first!");
         }
-    }   
+    } 
     
     /**
      * Method for the pet sleep
+     * Ask the user how many hours they would like their pet to sleep
+     * If the pet has full energy, tell them that they cannot sleep
+     * Inform them how much energy is given for each hour of sleep
+     * Increase the energy according to how much sleep they get
      */
     public void petSleeping() {
         boolean keepSleeping = true; // Condition for the while loop
         final double MAX_ENERGY = 100.0;
+        final int SLEEP_ENERGY = 10;
+
+        if (newPet != null) {
+            int sleepingTime = UI.askInt("How many hours would you like your pet to sleep? \n" +
+                                     "Each hour of sleep will increase energy by 10");
+            if (newPet.getEnergy() >= MAX_ENERGY) {
+                UI.println("Your pet is full of energy! They cannot sleep");
+            } else {
+                UI.println("Your pet is falling asleep, please wait");
+                UI.sleep(3000);
+                newPet.setEnergy(newPet.getEnergy() + (SLEEP_ENERGY * sleepingTime));
+                UI.println("Rise and shine!");
+                UI.println("Your pet now has " + newPet.getEnergy() + " energy!");
+            }
+        } else {
+            UI.println("You must create a pet first!");
+        }
     }
 }
