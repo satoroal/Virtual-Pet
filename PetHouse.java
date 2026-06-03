@@ -24,7 +24,6 @@ public class PetHouse
         UI.addButton("Create", this::createPet);  // Button for the user to create their pet
         UI.addButton("Feed", this::feedPet); // Button for feeding the pet
         UI.addButton("Sleep", this::petSleeping);// Button to put the pet to sleep
-        //UI.setMouseListener(this :: doMouse);
         UI.addButton("Play", this::petPlaying);// Button to play with the pet
         
         // Initializing the hashmap to store items in the food storage
@@ -154,27 +153,15 @@ public class PetHouse
      * If it does not exist, inform the user
      */
     public void feedPetFood(HashMap<String, Double> items, String chosenFood) {
-    if (items.containsKey(chosenFood)) {
-        double currentHunger = newPet.getHunger(); // Create a new variable for the pets current hunger
-        currentHunger += foodStorage.get(chosenFood); // Add the foods energy value to the current hunger
-        newPet.setHunger(currentHunger); // Set the new hunger of the pet
-        UI.println("Your pets hunger is now " + newPet.getHunger()); // Print the pets new hunger
-    } else {
-        UI.println(chosenFood + " is not in the storage. Sorry!");
-    }
-    }
-    
-    /**
-     * Method to report if the pet has been clicked onto
-     *
-    public void doMouse(String action, double x, double y) {
-        if(action.equals("clicked")) {
-            if(newPet.onPet(x,y)) {
-                petPlaying();
-            }
+        if (items.containsKey(chosenFood)) {
+            double currentHunger = newPet.getHunger(); // Create a new variable for the pets current hunger
+            currentHunger += foodStorage.get(chosenFood); // Add the foods energy value to the current hunger
+            newPet.setHunger(currentHunger); // Set the new hunger of the pet
+            UI.println("Your pets hunger is now " + newPet.getHunger()); // Print the pets new hunger
+        } else {
+            UI.println(chosenFood + " is not in the storage. Sorry!");
         }
     }
-    */
        
     /**
      * Method for the user to play with the pet
@@ -185,16 +172,16 @@ public class PetHouse
      * If the input is not valid inform the user and ask again
      */
     public void petPlaying() {
-        boolean keepClicking = true; // Condition for the while loop
+        boolean keepPlaying = true; // Condition for the while loop
         final double MIN_ENERGY = 15.0;
         
         if (newPet != null) {
-            while (keepClicking) {
+            while (keepPlaying) {
                 String clickInput = UI.askString("Would you like to play? Yes or No").toLowerCase();
                 if (clickInput.equals("yes") ) {
                     if(newPet.getEnergy() <= MIN_ENERGY) {
                         UI.println("Energy is too low! Your pet cannot play anymore");
-                        keepClicking = false;
+                        keepPlaying = false;
                     } else {
                         newPet.decreaseEnergy();
                         newPet.increaseMood();
@@ -203,7 +190,7 @@ public class PetHouse
                     } 
                 } else if (clickInput.equals("no")) {
                     UI.println("You are now done playing with your pet!");
-                    keepClicking = false;         
+                    keepPlaying = false;         
                 } 
                 else {
                     UI.println("Not valid input! Please try again");
@@ -241,5 +228,13 @@ public class PetHouse
         } else {
             UI.println("You must create a pet first!");
         }
+    }
+    
+    /**
+     * Method for the pet statistics to decay
+     * For every tick, the pets statistics should decrease
+     */
+    public void petDecay() {
+        
     }
 }

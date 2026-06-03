@@ -24,7 +24,12 @@ public class VirtualPet
     private double petLeft; // Left of the bounding box
     private double petTop; // Top of the bounding box
     private double petBottom; // Bottom of the bounding box
-    private boolean petClicked; // 
+    
+    // Pet colors
+    private Color color;
+    private Color healthyBlue = new Color(0, 150, 255); // Color for when the pet is healthy
+    private Color sicklyBlue = new Color(115, 147, 179); // Color for when the pet gets sick
+    
     /**
      * Constructor for objects of class virtualpet
      */
@@ -36,7 +41,7 @@ public class VirtualPet
         petHeight = 100.0;
         
         // The pets statistics
-        hunger = 50.0;
+        hunger = 100.0;
         energy = 50.0;
         moodLevel = 80.0;
         
@@ -68,7 +73,14 @@ public class VirtualPet
      * Method to draw the pet
      */
     public void draw() {
-        UI.setColor(Color.blue);
+        final double DANGEROUS_HUNGER = 20.0; // minimum hunger lever for the pet
+        
+        if (hunger <= DANGEROUS_HUNGER) {
+            UI.setColor(sicklyBlue); // Set the color to the sickly blue when hunger is too low
+        } else {
+            UI.setColor(healthyBlue); // Default color is the healthy blue
+        }
+
         UI.fillRect(petLeft, petTop, petWidth, petHeight);
     }
     
@@ -126,18 +138,5 @@ public class VirtualPet
      */
     public void increaseMood() {
         moodLevel += 5;
-    }
-    
-    /** 
-     * Method to report whether x and y are on the pet
-     */
-    public boolean onPet(double x, double y) {
-        if ((x >= this.petLeft) && (x <= this.petLeft + petWidth)
-        && (y >= this.petTop) && (y <= this.petBottom)) {
-            this.petClicked = true;    
-        } else {
-            this.petClicked = false;
-        }
-        return petClicked;
     }
 }
