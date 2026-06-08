@@ -1,5 +1,5 @@
-import ecs100.*;
-import java.awt.Color;
+import ecs100.*; // Import the ECS library
+import java.awt.Color; // Import the java color library
 import java.util.HashMap; // Import the hashmap class
 /**
  * Support class to create a virtual pet
@@ -77,10 +77,12 @@ public class VirtualPet
         
         if (hunger <= DANGEROUS_HUNGER) {
             UI.setColor(sicklyBlue); // Set the color to the sickly blue when hunger is too low
+            UI.println("Your pet is now sick! \n" +
+                        "Feed your pet to restore its health!");
         } else {
             UI.setColor(healthyBlue); // Default color is the healthy blue
         }
-
+        
         UI.fillRect(petLeft, petTop, petWidth, petHeight);
     }
     
@@ -127,10 +129,17 @@ public class VirtualPet
     }
     
     /**
+     * Method to set the mood level of the pet
+     */
+    public void setMoodLevel(double moodLevel) {
+        this.moodLevel = moodLevel;
+    }
+    
+    /**
      * Method to decrease the pets mood level
      */
     public void decreaseMood() {
-        moodLevel -= 2;
+        moodLevel -= 30;
     }
     
     /**
@@ -138,5 +147,12 @@ public class VirtualPet
      */
     public void increaseMood() {
         moodLevel += 5;
+    }
+    
+    /**
+     * Method to decrease the hunger as time passes
+     */
+    public void passTime() {
+        hunger -= 10;
     }
 }
