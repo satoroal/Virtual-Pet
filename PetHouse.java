@@ -13,6 +13,7 @@ public class PetHouse
     
     // Regarding the pets statistics
     private final double MAX_STAT; // The maximum amount any pet stat can be
+    private final double LOW_STAT; // What is considered as a low stat
     private final double MIN_STAT; // The minimum amount any pet stat can be
     
     // Hashmap
@@ -26,6 +27,7 @@ public class PetHouse
         UI.initialise(); // Initialise the program
         UI.addButton("Quit", UI::quit); // Creates button which enables user to quit the program
         UI.addButton("Create", this::createPet);  // Button for the user to create their pet
+        UI.addButton("Check Statistics", this::checkPetStatistics); // Button to check the pets statistics
         UI.addButton("Feed", this::feedPet); // Button for feeding the pet
         UI.addButton("Play", this::petPlaying);// Button to play with the pet
         UI.addButton("Sleep", this::petSleeping);// Button to put the pet to sleep
@@ -35,7 +37,8 @@ public class PetHouse
         addFoodItems(foodStorage);
           
         MAX_STAT = 100.0;
-        MIN_STAT = 20.0;
+        LOW_STAT = 20.0;
+        MIN_STAT = 0.00;
         
         Thread tickThread = new Thread(new Runnable() {
             public void run() {
@@ -89,7 +92,29 @@ public class PetHouse
                 UI.println("Your pets hunger is at " + newPet.getHunger() + "/100");
                 UI.println("Your pets energy is at " + newPet.getEnergy() + "/100");
                 UI.println("Your pets happiness is at " + newPet.getMoodLevel() + "/100");
+                
+                // Let the user know what to do when their pet gets sick / tired
+                UI.println(name + " might get sick, sad, or tired \n" +
+                            "Do not panic! This is an easy fix \n" +
+                            "If " + name + " gets sick, you must feed them to restore health \n" +
+                            "If " + name + " gets tired, make them sleep to restore energy! \n" +
+                            "Take care! And have a happy time caring for " + name + " :)!");
             }
+        }
+    }
+    
+    /**
+     * Allows the user to check the pets statistics
+     */
+    public void checkPetStatistics() {
+        if (newPet != null) { // Check if a pet has been created
+            // Print out the pets vitals to the user
+            UI.println("Your pets hunger is at " + newPet.getHunger() + "/100");
+            UI.println("Your pets energy is at " + newPet.getEnergy() + "/100");
+            UI.println("Your pets happiness is at " + newPet.getMoodLevel() + "/100");
+                
+        } else {
+            UI.println("You must create a pet first!");
         }
     }
     
@@ -118,6 +143,9 @@ public class PetHouse
                 } else if (feedingInput == 2) {
                     if (newPet.getHunger() >= MAX_STAT) {
                         UI.println("Your pet is full! You cannot feed them");
+                        newPet.setPetState("healthy"); // Set the pets state to healthy
+                        newPet.draw();
+                        newPet.setHunger(MAX_STAT); // Set the hunger to the maximum
                         feeding = false; // Stops the loop
     
                     } else {
@@ -127,7 +155,6 @@ public class PetHouse
                     }
                 } else if (feedingInput == 3) {
                     feeding = false; // Stops the loop 
-                    UI.println("Print to show loop has ended for testing purposes");
                 } else {
                     UI.println("That is not a valid option! Please try again");
                 }
@@ -170,12 +197,14 @@ public class PetHouse
      */
     public void feedPetFood(HashMap<String, Double> items, String chosenFood) {
         if (items.containsKey(chosenFood)) { // Check if the input is in the hashmap
-            double currentHunger = newPet.getHunger(); // Create a new variable for the pets current hunger
-            currentHunger += foodStorage.get(chosenFood); // Add the foods energy value to the current hunger
-            newPet.setHunger(currentHunger); // Set the new hunger of the pet
+            newPet.setHunger(newPet.getHunger() + foodStorage.get(chosenFood)); // Set the new hunger of the pet
          
-            if (newPet.getHunger() >= MAX_STAT) { // Check if hunger is above the maximum stat
-                newPet.setHunger(MAX_STAT); // Set the hunger to the maximum
+            if (newPet.getHunger() > LOW_STAT) { // Check if hunger is above the minimum
+                newPet.setPetState("healthy"); // Set the pets state to healthy
+                newPet.draw();
+                UI.println("Your pets hunger is now " + newPet.getHunger()); // Print the pets new hunger
+            } else if (newPet.getHunger() < MIN_STAT) { // Check if the hunger is below the minimum
+                newPet.setHunger(MIN_STAT);
             } else {
                 UI.println("Your pets hunger is now " + newPet.getHunger()); // Print the pets new hunger
             }
@@ -199,20 +228,26 @@ public class PetHouse
             while (keepPlaying) {
                 String playInput = UI.askString("Would you like to play? Yes or No").toLowerCase();
                 if (playInput.equals("yes") ) { // If the user has chosen to play
-                    if(newPet.getEnergy() <= MIN_STAT) {
-                        UI.println("Energy is too low! Your pet cannot play anymore");
+                    if(newPet.getEnergy() <= LOW_STAT) {
                         keepPlaying = false;
+                        UI.println("Energy is too low! Your pet cannot play anymore");
+                        newPet.setPetState("tired");
+                        newPet.draw();
                     } else {
                         newPet.decreaseEnergy();
                         newPet.increaseMood();
                         
-                        if (newPet.getMoodLevel() >= MAX_STAT) { // Check to max sure mood is not over maximum
+                        if (newPet.getEnergy() > MAX_STAT) { // Check to make sure energy is not over maximum
                             newPet.setMoodLevel(MAX_STAT); // If it is over the maximum, set it to the maximum
-                            keepPlaying = false; // Stop the loop
+                            newPet.setPetState("healthy");
+                            newPet.draw();
+                            keepPlaying = false;
+
                         } else {
+                            newPet.setPetState("healthy");
+                            newPet.draw();
                             UI.println("Energy is now at " + newPet.getEnergy());
                             UI.println("Happiness is now at " + newPet.getMoodLevel());
-                            keepPlaying = false; // Stop the loop
                         }
                     } 
                 } else if (playInput.equals("no")) { // If the user chooses to stop playing
@@ -242,33 +277,40 @@ public class PetHouse
         final double MIN_TIME = 1; // Minimum amount of time a pet can sleep
 
         if (newPet != null) { // If there is a created pet
-            while (keepSleeping) {
                 if (newPet.getEnergy() >= MAX_STAT) { // Do not allow sleeping if energy is full
                     UI.println("Your pet is full of energy! They cannot sleep");
                     keepSleeping = false; // Stop the loop
                 } else {
-                    int sleepingTime = UI.askInt("How many hours would you like your pet to sleep? \n" +
+                    while(keepSleeping) {
+                        int sleepingTime = UI.askInt("How many hours would you like your pet to sleep? \n" +
                              "Please pick between 1-10 hours! \n" +
                              "Each hour of sleep will increase energy by 10");
-                    if (MIN_TIME <= sleepingTime && sleepingTime <= MAX_TIME) { // If sleepingTime is between accepted range
-                        UI.println("Your pet is falling asleep, please wait");
-                        UI.sleep(3000); // Wait for 3 seconds
-                        newPet.setEnergy(newPet.getEnergy() + (SLEEP_ENERGY * sleepingTime)); // Calculate the new energy
-                        newPet.decreaseMood();
-                    
-                        if (newPet.getEnergy() <= MAX_STAT) {  // Check to make sure energy is not exceeding the maximum stat
-                            newPet.setEnergy(MAX_STAT); // If it is exceeding the maximum amount, set it to the maximum
-                            keepSleeping = false; // Stop the loop
-                        } else {                           
-                            UI.println("Rise and shine!");
-                            UI.println("Your pet now has " + newPet.getEnergy() + " energy!");
-                            keepSleeping = false; // Stop the loop  
+                        if (MIN_TIME <= sleepingTime && sleepingTime <= MAX_TIME) { // If sleepingTime is between accepted range
+                            UI.println("Your pet is falling asleep, please wait");
+                            newPet.setPetState("sleeping");
+                            newPet.draw();
+                            UI.sleep(3000); // Wait for 3 seconds
+                            newPet.setEnergy(newPet.getEnergy() + (SLEEP_ENERGY * sleepingTime)); // Calculate the new energy
+                        
+                            if (newPet.getEnergy() > MAX_STAT) {  // Check to make sure energy is not exceeding the maximum stat
+                                newPet.setEnergy(MAX_STAT); // If it is exceeding the maximum amount, set it to the maximum
+                                newPet.setPetState("healthy"); // Set the pets state to healthy
+                                newPet.draw();
+                                UI.println("Rise and shine!");
+                                UI.println("Your pet now has " + newPet.getEnergy() + " energy!");
+                                keepSleeping = false; // Stop the loop
+                            } else {                           
+                                newPet.setPetState("healthy");
+                                newPet.draw();
+                                UI.println("Rise and shine!");
+                                UI.println("Your pet now has " + newPet.getEnergy() + " energy!");
+                                keepSleeping = false; // Stop the loop  
+                            } 
+                        } else {
+                            UI.println("Your pet cannot sleep for that amount of time! Please try again");
                         }
-                    } else {
-                        UI.println("Your pet cannot sleep for that amount of time! Please try again");
                     }
                 } 
-            }
         } else {
             UI.println("You must create a pet first!");
         }
@@ -279,7 +321,7 @@ public class PetHouse
      * For every tick, the pets hunger should decrease
      */
     public void petDecay() {
-        newPet.passTime(); // Decrease hunger as time passes
+        newPet.decreaseHunger(); // Decrease hunger as time passes
         
         // Redraw the pet
         UI.clearGraphics(); // Clear the previous drawing

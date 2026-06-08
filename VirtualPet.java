@@ -9,6 +9,9 @@ import java.util.HashMap; // Import the hashmap class
  */
 public class VirtualPet
 {    
+    private String imagePrefix = "pet"; // Set the name of the image prefix
+    private String petState = "healthy"; // Set the default state to healthy
+    
     // Pet statistics
     private double hunger; // Hunger level of the pet
     private double energy; // Energy level of the pet
@@ -25,11 +28,6 @@ public class VirtualPet
     private double petTop; // Top of the bounding box
     private double petBottom; // Bottom of the bounding box
     
-    // Pet colors
-    private Color color;
-    private Color healthyBlue = new Color(0, 150, 255); // Color for when the pet is healthy
-    private Color sicklyBlue = new Color(115, 147, 179); // Color for when the pet gets sick
-    
     /**
      * Constructor for objects of class virtualpet
      */
@@ -37,11 +35,11 @@ public class VirtualPet
         // Regarding the pet's location
         petX = 150.0;
         petY = 150.0;
-        petWidth = 100.0;
-        petHeight = 100.0;
+        petWidth = 200.0;
+        petHeight = 155.0;
         
         // The pets statistics
-        hunger = 100.0;
+        hunger = 50.0;
         energy = 50.0;
         moodLevel = 80.0;
         
@@ -71,19 +69,25 @@ public class VirtualPet
     
     /**
      * Method to draw the pet
+     * If pet has low hunger, change to the appropriate image
      */
     public void draw() {
-        final double DANGEROUS_HUNGER = 20.0; // minimum hunger lever for the pet
+        final double LOW_STAT = 20.0; // Low statistic
         
-        if (hunger <= DANGEROUS_HUNGER) {
-            UI.setColor(sicklyBlue); // Set the color to the sickly blue when hunger is too low
-            UI.println("Your pet is now sick! \n" +
-                        "Feed your pet to restore its health!");
-        } else {
-            UI.setColor(healthyBlue); // Default color is the healthy blue
+        if (hunger <= LOW_STAT) { // If the pet reaches low hunger
+            this.petState = "sick";
         }
-        
-        UI.fillRect(petLeft, petTop, petWidth, petHeight);
+        // Seal robin image obtained and used with consent from creator / friend
+        String fname = null;
+        fname ="img\\" + this.imagePrefix + "-" + this.petState + ".png"; // Call the correct image based on the pet state
+        UI.drawImage(fname, petLeft, petTop, petWidth, petHeight);
+    }
+    
+    /**
+     * Set the state of the pet
+     */
+    public void setPetState(String petState) {
+        this.petState = petState;
     }
     
     /**
@@ -139,7 +143,7 @@ public class VirtualPet
      * Method to decrease the pets mood level
      */
     public void decreaseMood() {
-        moodLevel -= 30;
+        moodLevel -= 2;
     }
     
     /**
@@ -150,9 +154,9 @@ public class VirtualPet
     }
     
     /**
-     * Method to decrease the hunger as time passes
+     * Method to decrease of the pet
      */
-    public void passTime() {
+    public void decreaseHunger() {
         hunger -= 10;
     }
 }
